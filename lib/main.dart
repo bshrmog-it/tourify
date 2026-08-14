@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tourify/core/stroage/token_storage.dart';
 import 'package:tourify/features/package/cubits/countries/countries_cubit.dart';
-import 'package:tourify/features/package/views/pages/create_package_page.dart';
+//import 'package:tourify/features/package/views/pages/create_package_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       providers: [BlocProvider(create: (_) => CountriesCubit())],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const CreatePackagePage(),
+        //home: const CreatePackagePage(),
       ),
     );
   }
