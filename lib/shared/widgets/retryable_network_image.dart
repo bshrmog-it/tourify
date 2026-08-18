@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:tourify/features/places/services/image_load_queue.dart';
+import 'package:tourify/shared/services/image_load_queue.dart';
 
 // بديل عن Image.network بيمرّ بطابور تحميل (ImageLoadQueue).
 // عند الفشل: محاولتين تلقائيتين بصمت أول شي (بمؤشر تحميل بس)،
@@ -38,7 +38,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
     super.initState();
     _future = ImageLoadQueue.instance.fetchBytes(widget.url);
   }
-  
+
   @override
 void didUpdateWidget(covariant RetryableNetworkImage oldWidget) {
   super.didUpdateWidget(oldWidget);

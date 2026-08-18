@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tourify/shared/widgets/retryable_network_image.dart';
-import 'package:tourify/features/places/cubits/places/places_cubit.dart';
-import 'package:tourify/features/places/cubits/places/places_state.dart';
 import 'package:tourify/shared/cubits/favorites/favorites_cubit.dart';
 import 'package:tourify/shared/cubits/favorites/favorites_state.dart';
-import 'package:tourify/features/places/models/place_model.dart';
 import 'package:tourify/shared/services/location_lookup_service.dart';
-import 'package:tourify/features/places/screens/place_details_screen.dart';
+import 'package:tourify/features/hotels/cubits/hotels/hotels_cubit.dart';
+import 'package:tourify/features/hotels/cubits/hotels/hotels_state.dart';
+import 'package:tourify/features/hotels/models/hotel_model.dart';
+import 'package:tourify/features/hotels/screens/hotel_details_screen.dart';
 import 'package:tourify/shared/widgets/wallet_badge.dart';
 
-class PlacesListScreen extends StatelessWidget {
-  const PlacesListScreen({super.key});
+class HotelsListScreen extends StatelessWidget {
+  const HotelsListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PlacesCubit(favoritesCubit: context.read<FavoritesCubit>())..getPlaces(),
-      child: const _PlacesListView(),
+      create: (context) =>
+          HotelsCubit(favoritesCubit: context.read<FavoritesCubit>())
+            ..getHotels(),
+      child: const _HotelsListView(),
     );
   }
 }
 
-class _PlacesListView extends StatefulWidget {
-  const _PlacesListView();
+class _HotelsListView extends StatefulWidget {
+  const _HotelsListView();
 
   @override
-  State<_PlacesListView> createState() => _PlacesListViewState();
+  State<_HotelsListView> createState() => _HotelsListViewState();
 }
 
-class _PlacesListViewState extends State<_PlacesListView> {
+class _HotelsListViewState extends State<_HotelsListView> {
   Map<int, String> _cityLabels = {};
 
   @override
@@ -47,23 +49,26 @@ class _PlacesListViewState extends State<_PlacesListView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Tourist attractions ',
+          'Hotels',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
         elevation: 0,
         actions: const [WalletBadge()],
       ),
-      body: BlocBuilder<PlacesCubit, PlacesState>(
+      body: BlocBuilder<HotelsCubit, HotelsState>(
         builder: (context, state) {
           // ─────────────────────────────────────────────
           // Loading
           // ─────────────────────────────────────────────
 
-          if (state is PlacesLoading || state is PlacesInitial) {
+          if (state is HotelsLoading || state is HotelsInitial) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -71,22 +76,22 @@ class _PlacesListViewState extends State<_PlacesListView> {
           // Error
           // ─────────────────────────────────────────────
 
-          if (state is PlacesError) {
-            return _PlacesErrorState(message: state.message);
+          if (state is HotelsError) {
+            return _HotelsErrorState(message: state.message);
           }
 
-          final places = (state as PlacesLoaded).places;
+          final hotels = (state as HotelsLoaded).hotels;
 
           // ─────────────────────────────────────────────
           // Empty
           // ─────────────────────────────────────────────
 
-          if (places.isEmpty) {
-            return const _EmptyPlacesState();
+          if (hotels.isEmpty) {
+            return const _EmptyHotelsState();
           }
 
           // ─────────────────────────────────────────────
-          // Places Grid
+          // Hotels Grid
           // ─────────────────────────────────────────────
 
           return GridView.builder(
@@ -98,13 +103,13 @@ class _PlacesListViewState extends State<_PlacesListView> {
               crossAxisSpacing: 14,
               childAspectRatio: 0.67,
             ),
-            itemCount: places.length,
+            itemCount: hotels.length,
             itemBuilder: (context, index) {
-              final place = places[index];
+              final hotel = hotels[index];
 
-              return PlaceCard(
-                place: place,
-                cityLabel: _cityLabels[place.cityId],
+              return HotelCard(
+                hotel: hotel,
+                cityLabel: _cityLabels[hotel.cityId],
               );
             },
           );
@@ -115,14 +120,14 @@ class _PlacesListViewState extends State<_PlacesListView> {
 }
 
 // ═════════════════════════════════════════════════════════════
-// Place Card
+// Hotel Card
 // ═════════════════════════════════════════════════════════════
 
-class PlaceCard extends StatelessWidget {
-  final PlaceModel place;
+class HotelCard extends StatelessWidget {
+  final HotelModel hotel;
   final String? cityLabel;
 
-  const PlaceCard({super.key, required this.place, this.cityLabel});
+  const HotelCard({super.key, required this.hotel, this.cityLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +144,7 @@ class PlaceCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => PlaceDetailsScreen(placeId: place.id),
+              builder: (_) => HotelDetailsScreen(hotelId: hotel.id),
             ),
           );
         },
@@ -153,22 +158,22 @@ class PlaceCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Main image
-                  place.mainImageUrl != null
+                  // Hotel image
+                  hotel.mainImageUrl != null
                       ? RetryableNetworkImage(
-                          url: place.mainImageUrl!,
+                          url: hotel.mainImageUrl!,
                           fit: BoxFit.cover,
                         )
                       : Container(
                           color: colorScheme.surfaceContainerHighest,
                           child: Icon(
-                            Icons.place_outlined,
+                            Icons.hotel_outlined,
                             size: 42,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
 
-                  // Gradient
+                  // Bottom gradient
                   const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -184,35 +189,35 @@ class PlaceCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Favorite
+                  // Favorite button
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: _FavoriteButton(placeId: place.id),
+                    child: _FavoriteButton(hotelId: hotel.id),
                   ),
 
-                  // Rating
-                  if (place.averageRating != null)
+                  // Rating badge
+                  if (hotel.averageRating != null)
                     Positioned(
                       left: 10,
                       bottom: 10,
-                      child: _RatingBadge(rating: place.averageRating!),
+                      child: _RatingBadge(rating: hotel.averageRating!),
                     ),
                 ],
               ),
             ),
 
             // ───────────────────────────────────────────
-            // Place information
+            // Hotel Information
             // ───────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name
+                  // Hotel name
                   Text(
-                    place.name,
+                    hotel.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyLarge?.copyWith(
@@ -223,11 +228,11 @@ class PlaceCard extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   // Rating
-                  if (place.averageRating != null)
+                  if (hotel.averageRating != null)
                     Row(
                       children: [
                         ...List.generate(5, (index) {
-                          final filled = index < place.averageRating!.round();
+                          final filled = index < hotel.averageRating!.round();
 
                           return Icon(
                             filled
@@ -239,7 +244,7 @@ class PlaceCard extends StatelessWidget {
                         }),
                         const SizedBox(width: 5),
                         Text(
-                          place.averageRating!.toStringAsFixed(1),
+                          hotel.averageRating!.toStringAsFixed(1),
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colorScheme.onSurfaceVariant,
@@ -293,15 +298,15 @@ class PlaceCard extends StatelessWidget {
 // ═════════════════════════════════════════════════════════════
 
 class _FavoriteButton extends StatelessWidget {
-  final int placeId;
+  final int hotelId;
 
-  const _FavoriteButton({required this.placeId});
+  const _FavoriteButton({required this.hotelId});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<FavoritesCubit, FavoritesState>(
       builder: (context, favState) {
-        final isFavorite = favState.isFavorite(FavoriteType.place, placeId);
+        final isFavorite = favState.isFavorite(FavoriteType.hotel, hotelId);
 
         return Material(
           color: Colors.white.withOpacity(0.92),
@@ -311,8 +316,8 @@ class _FavoriteButton extends StatelessWidget {
             customBorder: const CircleBorder(),
             onTap: () {
               context.read<FavoritesCubit>().toggle(
-                FavoriteType.place,
-                placeId,
+                FavoriteType.hotel,
+                hotelId,
               );
             },
             child: SizedBox(
@@ -371,8 +376,8 @@ class _RatingBadge extends StatelessWidget {
 // Empty State
 // ═════════════════════════════════════════════════════════════
 
-class _EmptyPlacesState extends StatelessWidget {
-  const _EmptyPlacesState();
+class _EmptyHotelsState extends StatelessWidget {
+  const _EmptyHotelsState();
 
   @override
   Widget build(BuildContext context) {
@@ -393,21 +398,21 @@ class _EmptyPlacesState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.explore_outlined,
+                Icons.hotel_outlined,
                 size: 36,
                 color: colorScheme.primary,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'No places found',
+              'No hotels found',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              'There are no tourist places available at the moment.',
+              'There are no hotels available at the moment.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -424,10 +429,10 @@ class _EmptyPlacesState extends StatelessWidget {
 // Error State
 // ═════════════════════════════════════════════════════════════
 
-class _PlacesErrorState extends StatelessWidget {
+class _HotelsErrorState extends StatelessWidget {
   final String message;
 
-  const _PlacesErrorState({required this.message});
+  const _HotelsErrorState({required this.message});
 
   @override
   Widget build(BuildContext context) {

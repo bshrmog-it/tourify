@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tourify/features/hotels/widgets/room_booking_section.dart';
 import 'package:tourify/shared/widgets/retryable_network_image.dart';
-import 'package:tourify/features/places/cubits/place_details/place_details_cubit.dart';
-import 'package:tourify/features/places/cubits/place_details/place_details_state.dart';
 import 'package:tourify/shared/cubits/favorites/favorites_cubit.dart';
 import 'package:tourify/shared/cubits/favorites/favorites_state.dart';
+import 'package:tourify/features/hotels/cubits/hotel_details/hotel_details_cubit.dart';
+import 'package:tourify/features/hotels/cubits/hotel_details/hotel_details_state.dart';
 import 'package:tourify/shared/widgets/wallet_badge.dart';
 
-class PlaceDetailsScreen extends StatelessWidget {
-  final int placeId;
+class HotelDetailsScreen extends StatelessWidget {
+  final int hotelId;
 
-  const PlaceDetailsScreen({super.key, required this.placeId});
+  const HotelDetailsScreen({super.key, required this.hotelId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          PlaceDetailsCubit(favoritesCubit: context.read<FavoritesCubit>())
-            ..getPlaceDetails(placeId),
-      child: _PlaceDetailsView(placeId: placeId),
+          HotelDetailsCubit(favoritesCubit: context.read<FavoritesCubit>())
+            ..getHotelDetails(hotelId),
+      child: _HotelDetailsView(hotelId: hotelId),
     );
   }
 }
 
-class _PlaceDetailsView extends StatefulWidget {
-  final int placeId;
+class _HotelDetailsView extends StatefulWidget {
+  final int hotelId;
 
-  const _PlaceDetailsView({required this.placeId});
+  const _HotelDetailsView({required this.hotelId});
 
   @override
-  State<_PlaceDetailsView> createState() => _PlaceDetailsViewState();
+  State<_HotelDetailsView> createState() => _HotelDetailsViewState();
 }
 
-class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
+class _HotelDetailsViewState extends State<_HotelDetailsView> {
   String? _selectedImageUrl;
   int? _userRating;
   bool _submittingRating = false;
@@ -44,7 +45,7 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
     });
 
     try {
-      await context.read<PlaceDetailsCubit>().ratePlace(widget.placeId, rating);
+      await context.read<HotelDetailsCubit>().rateHotel(widget.hotelId, rating);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -55,7 +56,7 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("We couldn't submit your rating. Please try again."),
+            content: Text('We could not submit your rating. Please try again.'),
           ),
         );
 
@@ -70,14 +71,17 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      body: BlocBuilder<PlaceDetailsCubit, PlaceDetailsState>(
+      body: BlocBuilder<HotelDetailsCubit, HotelDetailsState>(
         builder: (context, state) {
-          if (state is PlaceDetailsLoading || state is PlaceDetailsInitial) {
+          if (state is HotelDetailsLoading || state is HotelDetailsInitial) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is PlaceDetailsError) {
+          if (state is HotelDetailsError) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -86,10 +90,12 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
             );
           }
 
-          final loaded = state as PlaceDetailsLoaded;
-          final place = loaded.place;
+          final loaded = state as HotelDetailsLoaded;
+          final hotel = loaded.hotel;
 
-          final heroImageUrl = _selectedImageUrl ?? place.mainImageUrl;
+          final heroImageUrl = _selectedImageUrl ?? hotel.mainImageUrl;
+
+          final averageRating = hotel.averageRating;
 
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
@@ -102,7 +108,7 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                 pinned: true,
                 stretch: true,
                 elevation: 0,
-                backgroundColor: Theme.of(context).colorScheme.surface,
+                backgroundColor: colorScheme.surface,
                 foregroundColor: Colors.white,
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
@@ -115,19 +121,15 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                               fit: BoxFit.cover,
                             )
                           : Container(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
+                              color: colorScheme.surfaceContainerHighest,
                               child: Icon(
-                                Icons.place_outlined,
+                                Icons.hotel_outlined,
                                 size: 64,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
 
-                      // Image gradient
+                      // Dark gradient for better readability.
                       DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -143,7 +145,7 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                         ),
                       ),
 
-                      // Place information
+                      // Hotel information over the image.
                       Positioned(
                         left: 20,
                         right: 20,
@@ -152,25 +154,19 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              place.name,
+                              hotel.name,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      Shadow(
-                                        blurRadius: 8,
-                                        color: Colors.black54,
-                                      ),
-                                    ],
-                                  ),
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                shadows: const [
+                                  Shadow(blurRadius: 8, color: Colors.black54),
+                                ],
+                              ),
                             ),
-                            if (place.averageRating != null) ...[
-                              const SizedBox(height: 8),
-                              _RatingSummary(rating: place.averageRating!),
-                            ],
+                            const SizedBox(height: 8),
+                            _RatingSummary(rating: averageRating),
                           ],
                         ),
                       ),
@@ -179,14 +175,14 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                 ),
                 actions: [
                   const Padding(
-                    padding: EdgeInsets.only(top: 8),
+                    padding: EdgeInsets.only(top: 0),
                     child: WalletBadge(),
                   ),
                   BlocBuilder<FavoritesCubit, FavoritesState>(
                     builder: (context, favState) {
                       final isFavorite = favState.isFavorite(
-                        FavoriteType.place,
-                        place.id,
+                        FavoriteType.hotel,
+                        hotel.id,
                       );
 
                       return Padding(
@@ -208,8 +204,8 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                             ),
                             onPressed: () {
                               context.read<FavoritesCubit>().toggle(
-                                FavoriteType.place,
-                                place.id,
+                                FavoriteType.hotel,
+                                hotel.id,
                               );
                             },
                           ),
@@ -230,50 +226,35 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ───────────────────────────────────
+                      // Contact Information
+                      // ───────────────────────────────────
+                      _InfoCard(
+                        icon: Icons.phone_outlined,
+                        title: 'Contact',
+                        value: hotel.phone,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // ───────────────────────────────────
                       // Description
                       // ───────────────────────────────────
                       _SectionTitle(
                         icon: Icons.info_outline,
-                        title: 'About this place',
+                        title: 'About this hotel',
                       ),
 
                       const SizedBox(height: 10),
 
                       Text(
-                        place.description,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        hotel.description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           height: 1.6,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
 
-                      // ───────────────────────────────────
-                      // History
-                      // ───────────────────────────────────
-                      if (place.history != null &&
-                          place.history!.trim().isNotEmpty) ...[
-                        const SizedBox(height: 28),
-
-                        _SectionTitle(
-                          icon: Icons.history_edu_outlined,
-                          title: 'History',
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Text(
-                          place.history!,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                height: 1.6,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 28),
 
                       // ───────────────────────────────────
                       // Photos
@@ -281,34 +262,31 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                       _SectionTitle(
                         icon: Icons.photo_library_outlined,
                         title: 'Photos',
-                        trailing: place.images.isNotEmpty
+                        trailing: hotel.images.isNotEmpty
                             ? Text(
-                                '${place.images.length} photos',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
+                                '${hotel.images.length} photos',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
                               )
                             : null,
                       ),
 
                       const SizedBox(height: 12),
 
-                      if (place.images.isEmpty)
-                        const _EmptyGallery()
+                      if (hotel.images.isEmpty)
+                        _EmptyGallery()
                       else
                         SizedBox(
                           height: 96,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
-                            itemCount: place.images.length,
+                            itemCount: hotel.images.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(width: 10),
                             itemBuilder: (context, index) {
-                              final imageUrl = place.images[index].fullUrl;
+                              final imageUrl = hotel.images[index].fullUrl;
 
                               final isSelected = heroImageUrl == imageUrl;
 
@@ -327,9 +305,7 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                                     borderRadius: BorderRadius.circular(14),
                                     border: isSelected
                                         ? Border.all(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
+                                            color: colorScheme.primary,
                                             width: 2,
                                           )
                                         : null,
@@ -350,6 +326,20 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
                             },
                           ),
                         ),
+
+                      const SizedBox(height: 30),
+
+                      // ───────────────────────────────────
+                      // Room Booking
+                      // ───────────────────────────────────
+                      _SectionTitle(
+                        icon: Icons.bed_outlined,
+                        title: 'Book a room',
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      RoomBookingSection(roomsByType: hotel.roomsByType),
 
                       const SizedBox(height: 30),
 
@@ -378,25 +368,29 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
 // ═════════════════════════════════════════════════════════════
 
 class _RatingSummary extends StatelessWidget {
-  final double rating;
+  final double? rating;
 
   const _RatingSummary({required this.rating});
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Row(
       children: [
         ...List.generate(5, (index) {
+          final filled = rating != null && index < rating!.round();
+
           return Icon(
-            index < rating.round() ? Icons.star : Icons.star_border,
+            filled ? Icons.star : Icons.star_border,
             size: 18,
             color: Colors.amber,
           );
         }),
         const SizedBox(width: 8),
         Text(
-          rating.toStringAsFixed(1),
-          style: const TextStyle(
+          rating != null ? rating!.toStringAsFixed(1) : 'No ratings yet',
+          style: textTheme.bodyMedium?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
@@ -441,6 +435,71 @@ class _SectionTitle extends StatelessWidget {
 }
 
 // ═════════════════════════════════════════════════════════════
+// Info Card
+// ═════════════════════════════════════════════════════════════
+
+class _InfoCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.45),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: colorScheme.primary, size: 21),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════
 // Rating Card
 // ═════════════════════════════════════════════════════════════
 
@@ -475,7 +534,7 @@ class _RatingCard extends StatelessWidget {
               Icon(Icons.star_outline_rounded, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                'Rate this place',
+                'Rate this hotel',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -532,7 +591,7 @@ class _RatingCard extends StatelessWidget {
           if (userRating != null && !submittingRating) ...[
             const SizedBox(height: 4),
             Text(
-              'You rated this place $userRating out of 5.',
+              'You rated this hotel $userRating out of 5.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.w500,
@@ -550,8 +609,6 @@ class _RatingCard extends StatelessWidget {
 // ═════════════════════════════════════════════════════════════
 
 class _EmptyGallery extends StatelessWidget {
-  const _EmptyGallery();
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

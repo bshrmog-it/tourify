@@ -33,6 +33,7 @@ class PlaceModel {
   final String? history;
   final double? averageRating;
   final List<PlaceImage> images;
+  final bool isFavorite;
 
   PlaceModel({
     required this.id,
@@ -43,6 +44,7 @@ class PlaceModel {
     this.history,
     this.averageRating,
     required this.images,
+    required this.isFavorite,
   });
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class PlaceModel {
       images: (json["images"] as List? ?? [])
           .map((e) => PlaceImage.fromJson(e))
           .toList(),
+          isFavorite: json["is_favorite"] == true,
     );
   }
 
