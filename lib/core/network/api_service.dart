@@ -54,8 +54,7 @@ class ApiService {
       return response.data;
     } on DioException catch (e) {
       throw Exception(
-        e.response?.data?['message'] ??
-            'There was an error: ${e.response?.statusCode}',
+        e.response?.data?['message'] ?? e.message ?? 'There was an error',
       );
     }
   }
@@ -110,6 +109,16 @@ class ApiService {
       return response.data;
     } on DioException catch (e) {
       throw Exception(e.response?.data?["message"] ?? "There was an error");
+    }
+  }
+
+  Future<dynamic> postForm(String endpoint, FormData formData) async {
+    try {
+      final response = await dio.post('$baseUrl$endpoint', data: formData);
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(e.response?.data?.toString() ?? e.message);
     }
   }
 }
