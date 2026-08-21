@@ -7,3 +7,4 @@ const kRejected = Color(0xFFDC2626);
 const kCompleted = Color(0xFF6366F1);
 const kBackground = Color(0xFFF6F7FB);
 const kRadius = 18.0;
+const kAvailable = Color(0xFF2563EB);

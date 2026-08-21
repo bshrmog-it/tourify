@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tourify/features/agency/create_package/cubits/countries/countries_cubit.dart';
 import 'package:tourify/features/agency/create_package/cubits/countries/countries_state.dart';
 import 'package:tourify/features/agency/create_package/cubits/package_creating/package_creation_cubit.dart';
@@ -21,6 +20,7 @@ class OverviewTab extends StatelessWidget {
   }
 
   Future<void> _pickStartDate(BuildContext context) async {
+    final colors = Theme.of(context).colorScheme;
     final cubit = context.read<PackageCreationCubit>();
     final state = cubit.state;
 
@@ -31,6 +31,21 @@ class OverviewTab extends StatelessWidget {
       initialDate: state.startDate ?? today,
       firstDate: today,
       lastDate: DateTime(2050),
+      builder: (context, child) {
+        final theme = Theme.of(context);
+
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.primary,
+              onPrimary: theme.colorScheme.onPrimary,
+              surface: theme.colorScheme.surface,
+              onSurface: theme.colorScheme.onSurface,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked == null) {
@@ -51,9 +66,9 @@ class OverviewTab extends StatelessWidget {
     final state = cubit.state;
 
     if (state.startDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('حدد تاريخ البداية أولاً')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select the start date first')),
+      );
       return;
     }
 
@@ -73,6 +88,7 @@ class OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final cubit = context.read<PackageCreationCubit>();
     final state = context.watch<PackageCreationCubit>().state;
 
@@ -306,19 +322,23 @@ class OverviewTab extends StatelessWidget {
           // ============================================================
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: colors.outline),
             ),
             child: SwitchListTile(
-              title: const Text(
+              title: Text(
                 'Include flights',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
               ),
               subtitle: Text(
                 state.withFlight
                     ? 'Departure and return flights required'
                     : 'Package without flights',
+                style: TextStyle(color: colors.onSurfaceVariant),
               ),
               value: state.withFlight,
               onChanged: (value) {
@@ -339,29 +359,42 @@ class OverviewTab extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: colors.outline),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Trip summary',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: colors.onSurface,
+                    ),
                   ),
 
                   const SizedBox(height: 12),
 
-                  Text('From: ${state.originCity!.name}'),
+                  Text(
+                    'From: ${state.originCity!.name}',
+                    style: TextStyle(color: colors.onSurface),
+                  ),
 
                   const SizedBox(height: 6),
 
-                  Text('To: ${state.country!.name}'),
+                  Text(
+                    'To: ${state.country!.name}',
+                    style: TextStyle(color: colors.onSurface),
+                  ),
 
                   const SizedBox(height: 6),
 
-                  Text('Duration: ${state.tripDays} days'),
+                  Text(
+                    'Duration: ${state.tripDays} days',
+                    style: TextStyle(color: colors.onSurface),
+                  ),
 
                   const SizedBox(height: 6),
 
@@ -369,6 +402,7 @@ class OverviewTab extends StatelessWidget {
                     state.withFlight
                         ? 'Flights: Included'
                         : 'Flights: Not included',
+                    style: TextStyle(color: colors.onSurface),
                   ),
                 ],
               ),
@@ -382,7 +416,6 @@ class OverviewTab extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   final String text;
-
   const _Label(this.text);
 
   @override
@@ -409,19 +442,22 @@ class _DateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
+
       child: Container(
         padding: const EdgeInsets.all(14),
+
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: colors.outline),
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.indigo, size: 20),
+            Icon(icon, color: colors.primary, size: 20),
 
             const SizedBox(width: 10),
 
@@ -431,14 +467,20 @@ class _DateCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
 
                   const SizedBox(height: 4),
 
                   Text(
                     value,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface,
+                    ),
                   ),
                 ],
               ),

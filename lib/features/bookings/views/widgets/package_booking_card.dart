@@ -107,7 +107,7 @@ class _PackageBookingCardState extends State<PackageBookingCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Package #${g.packageId}',
+                          g.displayName,
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,

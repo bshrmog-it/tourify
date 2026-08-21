@@ -1,14 +1,6 @@
 import 'booking_model.dart';
 
-/// حجز باكج كامل: الصف الأب + كل العناصر التابعة له
 class PackageBookingGroup {
-  bool get isCompleted {
-    if (status != 'confirmed') return false;
-    final date = DateTime.tryParse(bookingDate);
-    if (date == null) return false;
-    return date.isBefore(DateTime.now());
-  }
-
   final BookingModel parent;
   final List<BookingModel> items;
 
@@ -18,12 +10,28 @@ class PackageBookingGroup {
   String get status => parent.status;
   String get bookingDate => parent.bookingDate;
 
+  String get displayName {
+    for (final item in items) {
+      if (item.packageName != null && item.packageName!.isNotEmpty) {
+        return item.packageName!;
+      }
+    }
+    return 'Package #$packageId';
+  }
+
   int get hotelRoomsCount =>
       items.where((i) => i.bookableType == BookableType.hotelRoom).length;
   int get flightsCount =>
       items.where((i) => i.bookableType == BookableType.flightSchedule).length;
   int get restaurantsCount =>
       items.where((i) => i.bookableType == BookableType.restaurant).length;
+
+  bool get isCompleted {
+    if (status != 'confirmed') return false;
+    final date = DateTime.tryParse(bookingDate);
+    if (date == null) return false;
+    return date.isBefore(DateTime.now());
+  }
 }
 
 class StandaloneBooking {

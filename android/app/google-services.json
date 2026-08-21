@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "47784141917",
+    "project_id": "tourify-a3777",
+    "storage_bucket": "tourify-a3777.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47784141917:android:17fc56c591a1a76903d9b4",
+        "android_client_info": {
+          "package_name": "com.example.tourify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBm_tNVdlrOy4FQ47DbO14v7EQGbdvikhY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

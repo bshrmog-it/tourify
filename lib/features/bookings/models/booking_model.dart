@@ -29,9 +29,11 @@ class BookingModel {
   final BookableType bookableType;
   final int bookableId;
   final String bookingDate;
-  final String status; // pending, confirmed, rejected
+  final String status;
   final int? packageBookingId;
   final int? packageId;
+  final String? packageName;
+  final int? ticketsCount;
   final String createdAt;
 
   BookingModel({
@@ -42,6 +44,8 @@ class BookingModel {
     required this.status,
     required this.packageBookingId,
     required this.packageId,
+    this.packageName,
+    this.ticketsCount,
     required this.createdAt,
   });
 
@@ -54,6 +58,8 @@ class BookingModel {
       status: json['status'] ?? 'pending',
       packageBookingId: json['package_booking_id'],
       packageId: json['package_id'],
+      packageName: json['package_name'],
+      ticketsCount: json['tickets_count'],
       createdAt: json['created_at'] ?? '',
     );
   }

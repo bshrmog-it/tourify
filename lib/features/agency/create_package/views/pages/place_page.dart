@@ -13,15 +13,18 @@ class PlacePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return BlocProvider(
       create: (_) =>
           PlacesCubit()..getPlaces(countryId: countryId, cityId: cityId),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F8FA),
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: colors.surface,
           elevation: 0,
-          foregroundColor: Colors.black,
+          foregroundColor: colors.onSurface,
           title: const Text(
             'Explore Places',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -45,7 +48,7 @@ class PlacePage extends StatelessWidget {
             if (state is PlacesLoaded) {
               if (state.places.isEmpty) {
                 return const Center(
-                  child: Text('لا يوجد أماكن سياحية بهذه المحافظة'),
+                  child: Text('No tourist places found in this city'),
                 );
               }
 
@@ -87,8 +90,6 @@ class _PlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = place.images.isNotEmpty ? place.images.first : null;
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -98,7 +99,9 @@ class _PlaceCard extends StatelessWidget {
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: _NetworkImage(url: image),
+              child: _NetworkImage(
+                url: place.images.isNotEmpty ? place.images.first : null,
+              ),
             ),
           ),
 
@@ -117,7 +120,10 @@ class _PlaceCard extends StatelessWidget {
             place.description.isEmpty ? 'Tourist place' : place.description,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -132,8 +138,10 @@ class _NetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     if (url == null || url!.isEmpty) {
-      return _placeholder();
+      return _placeholder(context);
     }
 
     return Image.network(
@@ -142,7 +150,7 @@ class _NetworkImage extends StatelessWidget {
       height: double.infinity,
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) {
-        return _placeholder();
+        return _placeholder(context);
       },
       loadingBuilder: (context, child, progress) {
         if (progress == null) {
@@ -150,7 +158,7 @@ class _NetworkImage extends StatelessWidget {
         }
 
         return Container(
-          color: const Color(0xFFEDEDF2),
+          color: colors.surfaceContainerHighest,
           alignment: Alignment.center,
           child: const SizedBox(
             width: 22,
@@ -162,11 +170,17 @@ class _NetworkImage extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() {
+  Widget _placeholder(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Container(
-      color: const Color(0xFFEDEDF2),
+      color: colors.surfaceContainerHighest,
       alignment: Alignment.center,
-      child: Icon(Icons.place_outlined, size: 38, color: Colors.grey.shade400),
+      child: Icon(
+        Icons.place_outlined,
+        size: 38,
+        color: colors.onSurfaceVariant,
+      ),
     );
   }
 }

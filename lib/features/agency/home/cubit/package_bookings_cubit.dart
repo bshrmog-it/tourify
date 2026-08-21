@@ -43,13 +43,19 @@ class PackageBookingsCubit extends Cubit<PackageBookingsState> {
           .where((b) => b.id != bookingId)
           .toList();
 
+      final newConfirmedCount = _package.confirmedCount + 1;
+
+      final newAvailableCount = (_package.quantity - newConfirmedCount).clamp(
+        0,
+        _package.quantity,
+      );
+
       _package = _package.copyWith(
         pendingCount: (_package.pendingCount - 1).clamp(0, 999999),
-        confirmedCount: _package.confirmedCount + 1,
+        confirmedCount: newConfirmedCount,
+        availableCount: newAvailableCount,
 
-        // IMPORTANT:
-        // Available does NOT change here.
-        // Rejected does NOT change here.
+        // Rejected does NOT change.
       );
 
       emit(PackageBookingsLoaded(bookings: updatedBookings, package: _package));
@@ -80,12 +86,10 @@ class PackageBookingsCubit extends Cubit<PackageBookingsState> {
 
       _package = _package.copyWith(
         pendingCount: (_package.pendingCount - 1).clamp(0, 999999),
-
-        // Rejected request increases.
         rejectedCount: _package.rejectedCount + 1,
 
-        // Rejected booking releases its seat.
-        availableCount: _package.availableCount + 1,
+        // IMPORTANT:
+        // Available does NOT change when rejecting.
       );
 
       emit(PackageBookingsLoaded(bookings: updatedBookings, package: _package));

@@ -59,8 +59,8 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
       state.copyWith(
         originCity: city,
 
-        // إذا تغير مكان الانطلاق
-        // الرحلات القديمة لم تعد صالحة.
+        // If the origin changes,
+        // the old flights are no longer valid.
         days: const [],
         selectedTabIndex: 0,
 
@@ -80,8 +80,8 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
       state.copyWith(
         country: country,
 
-        // الدولة السياحية تغيرت
-        // لذلك الأيام والرحلات القديمة لم تعد صالحة.
+        // The destination country changed,
+        // so the old days and flights are no longer valid.
         days: const [],
         selectedTabIndex: 0,
 
@@ -147,6 +147,7 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
       ),
     );
   }
+
   // ================================================================
   // FLIGHT OPTION
   // ================================================================
@@ -377,7 +378,7 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
 
     updatedDays[index].flight = flight;
     updatedDays[index].flightId = flight.id;
-    updatedDays[index].flightSchedule = schedule; // 👈 جديد
+    updatedDays[index].flightSchedule = schedule;
 
     emit(
       state.copyWith(
@@ -398,7 +399,7 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
 
     updatedDays[index].flight = null;
     updatedDays[index].flightId = null;
-    updatedDays[index].flightSchedule = null; // 👈 جديد
+    updatedDays[index].flightSchedule = null;
 
     emit(
       state.copyWith(
@@ -431,20 +432,20 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
       return false;
     }
 
-    // لازم عدد الأيام يطابق الفترة المحددة.
+    // The number of days must match the selected period.
     if (state.days.length != state.tripDays) {
       return false;
     }
 
-    // كل يوم لازم يكون مكتمل.
+    // Every day must be complete.
     for (final day in state.days) {
       if (day.hotel == null || day.place == null || day.restaurant == null) {
         return false;
       }
     }
 
-    // إذا الطيران مفعّل،
-    // فقط أول يوم وآخر يوم يحتاجان Flight.
+    // If flights are enabled,
+    // only the first and last days need a Flight.
     if (state.withFlight) {
       if (state.days.isEmpty) {
         return false;
@@ -567,9 +568,6 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
     if (!isReadyForHint) {
       final error = _validationMessage();
 
-      print('❌ CREATE BLOCKED');
-      print('❌ ERROR: $error');
-
       emit(
         state.copyWith(
           status: PackageCreationStatus.error,
@@ -579,9 +577,6 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
 
       return;
     }
-
-    print('✅ Validation passed');
-    print('🚀 Sending package to API...');
 
     emit(
       state.copyWith(
@@ -596,8 +591,6 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
           .map((day) => day.toPackageDayModel())
           .toList();
 
-      print('📦 Day models:');
-
       for (final day in dayModels) {
         print(day.toJson());
       }
@@ -611,15 +604,8 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
         days: dayModels,
       );
 
-      print('✅ PACKAGE CREATED SUCCESSFULLY');
-
       emit(state.copyWith(status: PackageCreationStatus.success));
     } catch (e, stackTrace) {
-      print('❌❌ CREATE PACKAGE API ERROR ❌❌');
-      print('ERROR: $e');
-      print('STACK TRACE:');
-      print(stackTrace);
-
       emit(
         state.copyWith(
           status: PackageCreationStatus.error,
@@ -658,44 +644,44 @@ class PackageCreationCubit extends Cubit<PackageCreationState> {
 
   String _validationMessage() {
     if (state.country == null) {
-      return 'اختر الدولة أولاً';
+      return 'Please select a country first';
     }
 
     if (state.startDate == null || state.endDate == null) {
-      return 'حدد تاريخ البداية والنهاية';
+      return 'Please select the start and end dates';
     }
 
     if (state.days.length != state.tripDays) {
-      return 'لازم يكون عندك ${state.tripDays} أيام بالضبط';
+      return 'You must have exactly ${state.tripDays} days';
     }
 
     for (int i = 0; i < state.days.length; i++) {
       final day = state.days[i];
 
       if (day.hotel == null) {
-        return 'كمل الفندق في Day ${i + 1}';
+        return 'Complete the hotel for Day ${i + 1}';
       }
 
       if (day.place == null) {
-        return 'كمل المكان السياحي في Day ${i + 1}';
+        return 'Complete the tourist place for Day ${i + 1}';
       }
 
       if (day.restaurant == null) {
-        return 'كمل المطعم في Day ${i + 1}';
+        return 'Complete the restaurant for Day ${i + 1}';
       }
     }
 
     if (state.withFlight) {
       if (state.days.first.flight == null) {
-        return 'اختر رحلة الذهاب في Day 1';
+        return 'Select the departure flight for Day 1';
       }
 
       if (state.days.last.flight == null) {
-        return 'اختر رحلة العودة في Day ${state.days.length}';
+        return 'Select the return flight for Day ${state.days.length}';
       }
     }
 
-    return 'كمل بيانات الباقة';
+    return 'Complete the package information';
   }
 
   String _formatDate(DateTime date) {

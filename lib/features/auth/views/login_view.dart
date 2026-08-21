@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tourify/features/agency/create_package/views/pages/add_package_view.dart';
 import 'package:tourify/features/agency/home/views/active_packages_view.dart';
 import 'package:tourify/features/agency/home/views/agency_main_layout_view.dart';
+import 'package:tourify/features/airline_user/views/add_flight_schedule_view.dart';
+import 'package:tourify/features/airline_user/views/airline_main_layout_view.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import 'signup_view.dart';
@@ -46,6 +48,13 @@ class _LoginViewState extends State<LoginView> {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (context) => AgencyMainLayoutView(),
+                    ),
+                  );
+                } else if (state.role == 'airline') {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AirlineMainLayoutView(),
                     ),
                   );
                 } else {

@@ -13,15 +13,18 @@ class HotelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return BlocProvider(
       create: (_) =>
           HotelsCubit()..getHotels(countryId: countryId, cityId: cityId),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F8FA),
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: colors.surface,
           elevation: 0,
-          foregroundColor: Colors.black,
+          foregroundColor: colors.onSurface,
           title: const Text(
             'Explore Hotels',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -90,6 +93,9 @@ class _HotelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -119,7 +125,7 @@ class _HotelCard extends StatelessWidget {
               hotel.roomTypes.join(' • '),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 11, color: colors.onSurfaceVariant),
             ),
         ],
       ),
@@ -134,8 +140,11 @@ class _NetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     if (url == null || url!.isEmpty) {
-      return _placeholder();
+      return _placeholder(context);
     }
 
     return Image.network(
@@ -144,7 +153,7 @@ class _NetworkImage extends StatelessWidget {
       height: double.infinity,
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) {
-        return _placeholder();
+        return _placeholder(context);
       },
       loadingBuilder: (context, child, progress) {
         if (progress == null) {
@@ -152,7 +161,7 @@ class _NetworkImage extends StatelessWidget {
         }
 
         return Container(
-          color: const Color(0xFFEDEDF2),
+          color: colors.surfaceContainerHighest,
           alignment: Alignment.center,
           child: const SizedBox(
             width: 22,
@@ -164,11 +173,17 @@ class _NetworkImage extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() {
+  Widget _placeholder(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Container(
-      color: const Color(0xFFEDEDF2),
+      color: colors.surfaceContainerHighest,
       alignment: Alignment.center,
-      child: Icon(Icons.hotel_outlined, size: 38, color: Colors.grey.shade400),
+      child: Icon(
+        Icons.hotel_outlined,
+        size: 38,
+        color: colors.onSurfaceVariant,
+      ),
     );
   }
 }
