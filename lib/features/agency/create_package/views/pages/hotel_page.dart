@@ -49,7 +49,7 @@ class HotelPage extends StatelessWidget {
               if (state.hotels.isEmpty) {
                 return const Center(
                   child: Text(
-                    'لا يوجد فنادق بهذه المحافظة',
+                    'No hotels found in this city',
                     style: TextStyle(fontSize: 16),
                   ),
                 );
