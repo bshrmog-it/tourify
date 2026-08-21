@@ -46,7 +46,7 @@ class _HotelDetailsViewState extends State<_HotelDetailsView> {
 
     try {
       await context.read<HotelDetailsCubit>().rateHotel(widget.hotelId, rating);
-
+      await context.read<HotelDetailsCubit>().getHotelDetails(widget.hotelId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Thank you for your rating!')),

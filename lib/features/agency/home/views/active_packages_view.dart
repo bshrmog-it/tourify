@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tourify/core/theme/theme_controller.dart';
 
 import 'package:tourify/features/agency/create_package/views/pages/add_package_view.dart';
 import 'package:tourify/features/agency/home/cubit/active_packages_cubit.dart';
@@ -29,6 +30,28 @@ class ActivePackagesView extends StatelessWidget {
             'Active Packages',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
+          actions: [
+          IconButton(
+            tooltip: ThemeController.mode.value == ThemeMode.dark
+                ? 'Light mode'
+                : 'Dark mode',
+            onPressed: () {
+              ThemeController.toggle();
+            },
+            icon: ValueListenableBuilder<ThemeMode>(
+              valueListenable: ThemeController.mode,
+              builder: (context, mode, _) {
+                return Icon(
+                  mode == ThemeMode.dark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                );
+              },
+            ),
+          ),
+          
+          const SizedBox(width: 8),
+        ],
         ),
         body: BlocBuilder<ActivePackagesCubit, ActivePackagesState>(
           builder: (context, state) {

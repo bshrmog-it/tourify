@@ -48,6 +48,7 @@ class _RestaurantDetailsViewState extends State<_RestaurantDetailsView> {
       await context
           .read<RestaurantDetailsCubit>()
           .rateRestaurant(widget.restaurantId, rating);
+          await context.read<RestaurantDetailsCubit>().getRestaurantDetails(widget.restaurantId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

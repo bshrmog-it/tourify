@@ -187,7 +187,7 @@ class RestaurantCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => RestaurantDetailsScreen(restaurantId: restaurant.id)),
-        ),
+        ).then((_) => context.read<RestaurantsCubit>().getRestaurants()),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

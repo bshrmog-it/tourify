@@ -84,15 +84,20 @@ class _FlightSchedulesView extends StatelessWidget {
           title: const Text('Flight schedules'),
           elevation: 0,
           actions: const [
-          Padding(padding: EdgeInsets.only(top: 8), child: WalletBadge()),
-          SizedBox(width: 8),
-        ],
+            Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: WalletBadge(),
+            ),
+            SizedBox(width: 8),
+          ],
         ),
         body: BlocBuilder<FlightSchedulesCubit, FlightSchedulesState>(
           builder: (context, state) {
             if (state is FlightSchedulesLoading ||
                 state is FlightSchedulesInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
             }
 
             if (state is FlightSchedulesError) {
@@ -202,8 +207,6 @@ class _FlightSchedulesView extends StatelessWidget {
     );
   }
 
-  // Kept in the widget so the listener can pass the exact schedule
-  // that was selected to the success screen.
   static FlightScheduleModel? _lastSelectedSchedule;
 
   String _dateLabel(String value) {
@@ -211,8 +214,18 @@ class _FlightSchedulesView extends StatelessWidget {
     if (date == null) return value;
 
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     return '${date.day} ${months[date.month - 1]} ${date.year}';
@@ -240,8 +253,18 @@ class _ScheduleCard extends StatelessWidget {
     if (date == null) return value;
 
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     return '${date.day} ${months[date.month - 1]} ${date.year}';
@@ -250,6 +273,212 @@ class _ScheduleCard extends StatelessWidget {
   String _time(String value) {
     if (value.length >= 5) return value.substring(0, 5);
     return value;
+  }
+
+  Future<void> _showBookingConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final scheme = theme.colorScheme;
+
+        return AlertDialog(
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: scheme.primary.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.flight_takeoff_rounded,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Confirm booking',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Please review your flight details before confirming.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Airline
+                _ConfirmationRow(
+                  icon: Icons.business_rounded,
+                  label: 'Airline',
+                  value: airlineName,
+                ),
+
+                const SizedBox(height: 14),
+
+                // Route
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest.withOpacity(.45),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _RoutePoint(
+                          city: flight.fromCity.name,
+                          label: 'Departure',
+                          time: _time(schedule.departureTime),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 20,
+                          color: scheme.primary,
+                        ),
+                      ),
+                      Expanded(
+                        child: _RoutePoint(
+                          city: flight.toCity.name,
+                          label: 'Arrival',
+                          time: _time(schedule.arrivalTime),
+                          right: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                _ConfirmationRow(
+                  icon: Icons.calendar_today_rounded,
+                  label: 'Date',
+                  value: _dateLabel(schedule.date),
+                ),
+
+                const SizedBox(height: 14),
+
+                _ConfirmationRow(
+                  icon: Icons.event_seat_rounded,
+                  label: 'Available seats',
+                  value: '${schedule.seats}',
+                ),
+
+                const SizedBox(height: 18),
+
+                // Price
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withOpacity(.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: scheme.primary.withOpacity(.18),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.payments_rounded,
+                        color: scheme.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Total price',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '\$${flight.price.toStringAsFixed(2)}',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'The booking will be confirmed after you continue.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              icon: const Icon(Icons.check_rounded),
+              label: const Text('Confirm Booking'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    // The booking endpoint receives the FlightSchedule ID.
+    _FlightSchedulesView._lastSelectedSchedule = schedule;
+
+    context.read<FlightBookingCubit>().book(schedule.id);
   }
 
   @override
@@ -262,7 +491,9 @@ class _ScheduleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: scheme.outlineVariant),
+        border: Border.all(
+          color: scheme.outlineVariant,
+        ),
       ),
       child: Column(
         children: [
@@ -330,16 +561,14 @@ class _ScheduleCard extends StatelessWidget {
                 return FilledButton(
                   onPressed: loading
                       ? null
-                      : () {
-                          // The booking endpoint receives the FlightSchedule ID.
-                          _FlightSchedulesView._lastSelectedSchedule = schedule;
-                          context.read<FlightBookingCubit>().book(schedule.id);
-                        },
+                      : () => _showBookingConfirmation(context),
                   child: loading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text('Book Now'),
                 );
@@ -348,6 +577,113 @@ class _ScheduleCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ConfirmationRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _ConfirmationRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: scheme.primary.withOpacity(.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            size: 19,
+            color: scheme.primary,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RoutePoint extends StatelessWidget {
+  final String city;
+  final String label;
+  final String time;
+  final bool right;
+
+  const _RoutePoint({
+    required this.city,
+    required this.label,
+    required this.time,
+    this.right = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment:
+          right ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          time,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          city,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: right ? TextAlign.right : TextAlign.left,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -378,7 +714,11 @@ class _TimeBlock extends StatelessWidget {
               right ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: [
             if (!right) ...[
-              Icon(icon, size: 16, color: scheme.primary),
+              Icon(
+                icon,
+                size: 16,
+                color: scheme.primary,
+              ),
               const SizedBox(width: 5),
             ],
             Text(
@@ -389,7 +729,11 @@ class _TimeBlock extends StatelessWidget {
             ),
             if (right) ...[
               const SizedBox(width: 5),
-              Icon(icon, size: 16, color: scheme.primary),
+              Icon(
+                icon,
+                size: 16,
+                color: scheme.primary,
+              ),
             ],
           ],
         ),
@@ -408,14 +752,19 @@ class _TimeBlock extends StatelessWidget {
 class _SeatsBadge extends StatelessWidget {
   final int seats;
 
-  const _SeatsBadge({required this.seats});
+  const _SeatsBadge({
+    required this.seats,
+  });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 9,
+        vertical: 6,
+      ),
       decoration: BoxDecoration(
         color: scheme.primary.withOpacity(.09),
         borderRadius: BorderRadius.circular(10),

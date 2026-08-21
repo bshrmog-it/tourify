@@ -141,7 +141,7 @@ class PlaceCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => PlaceDetailsScreen(placeId: place.id),
             ),
-          );
+          ).then((_) => context.read<PlacesCubit>().getPlaces());
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

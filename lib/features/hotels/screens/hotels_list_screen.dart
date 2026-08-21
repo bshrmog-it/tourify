@@ -146,7 +146,7 @@ class HotelCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => HotelDetailsScreen(hotelId: hotel.id),
             ),
-          );
+          ).then((_) => context.read<HotelsCubit>().getHotels());
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
