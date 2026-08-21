@@ -5,12 +5,10 @@ import 'package:tourify/features/agency/home/views/active_packages_view.dart';
 import 'package:tourify/features/agency/home/views/agency_main_layout_view.dart';
 import 'package:tourify/features/airline_user/views/add_flight_schedule_view.dart';
 import 'package:tourify/features/airline_user/views/airline_main_layout_view.dart';
+import 'package:tourify/features/dashboard/screens/main_shell.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import 'signup_view.dart';
-// TODO: Replace this with the real home view for each role
-// import '../../home/views/user_home_view.dart';
-// import '../../agency/views/agency_home_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -58,7 +56,12 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   );
                 } else {
-                  // TODO: Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const UserHomeView()));
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MainShell(),
+                    ),
+                  );
                 }
               });
             }

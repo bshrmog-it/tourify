@@ -45,7 +45,7 @@ class _PlaceDetailsViewState extends State<_PlaceDetailsView> {
 
     try {
       await context.read<PlaceDetailsCubit>().ratePlace(widget.placeId, rating);
-
+      await context.read<PlaceDetailsCubit>().getPlaceDetails(widget.placeId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Thank you for your rating!')),

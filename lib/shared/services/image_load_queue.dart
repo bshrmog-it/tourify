@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 // طابور تحميل بسيط بيحدد كم صورة نطلبها بنفس الوقت من السيرفر.
 // سيرفر التطوير المحلي (php artisan serve) عالويندوز بيعالج طلب
@@ -29,9 +30,24 @@ class ImageLoadQueue {
     await _acquireSlot();
     try {
       final response = await _dio.get<List<int>>(
-        url,
-        options: Options(responseType: ResponseType.bytes),
-      );
+  url,
+  options: Options(
+    responseType: ResponseType.bytes,
+    validateStatus: (status) => true,
+  ),
+);
+
+debugPrint(
+  'IMAGE REQUEST: $url | '
+  'STATUS: ${response.statusCode} | '
+  'BYTES: ${response.data?.length ?? 0}',
+);
+
+if (response.statusCode != 200) {
+  throw Exception(
+    'Image request failed: ${response.statusCode} - $url',
+  );
+}
       final bytes = Uint8List.fromList(response.data!);
       _cache[url] = bytes;
       return bytes;

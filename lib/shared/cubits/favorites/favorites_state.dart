@@ -1,4 +1,4 @@
-enum FavoriteType { place, hotel, restaurant, airline }
+enum FavoriteType { place, hotel, restaurant, airline, agency }
 
 class FavoritesState {
   final Map<FavoriteType, Set<int>> favorites;
